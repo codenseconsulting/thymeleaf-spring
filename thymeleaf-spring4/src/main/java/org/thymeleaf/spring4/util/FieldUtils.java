@@ -36,6 +36,8 @@ import org.thymeleaf.Configuration;
 import org.thymeleaf.context.IProcessingContext;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 import org.thymeleaf.spring4.naming.SpringContextVariableNames;
+import org.thymeleaf.spring4.util.portlet.IPortletUtil;
+import org.thymeleaf.spring4.util.portlet.PortletUtilFactory;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.SelectionVariableExpression;
@@ -359,7 +361,34 @@ public final class FieldUtils {
 
     }
 
+    /**
+     * Specialized version of {@link BindStatus} to return a portlet namespace
+     * prefixed id from method {@link #getExpression()}.
+     * 
+     * @author mikko.taivainen@codense.fi
+     *
+     */
+    static class BindStatusWithNamespacePrefix extends BindStatus {
 
+    	private String namespacePrefix;
+    	
+    	public BindStatusWithNamespacePrefix(RequestContext requestContext, String path, boolean htmlEscape, final String namespacePrefix)
+    			throws IllegalStateException {
+    		super(requestContext, path, htmlEscape);
+    		this.namespacePrefix = namespacePrefix;
+    	}
+
+    	@Override
+    	public String getExpression() {
+    		final String baseExpr = super.getExpression();
+    		if (baseExpr != null && baseExpr.length() > 0) {
+    			return namespacePrefix + baseExpr;
+    		} else {
+    			return baseExpr;
+    		}
+    	}
+    	
+    }
 
     /**
      * 
@@ -396,9 +425,9 @@ public final class FieldUtils {
             return null;
         }
 
-
+        final String portletNamespace = portletNamespace();
         if (!optional) {
-            return new BindStatus(requestContext, completeExpression, false);
+            return new BindStatusWithNamespacePrefix(requestContext, completeExpression, false, portletNamespace);
         }
 
 
@@ -406,7 +435,7 @@ public final class FieldUtils {
             // Creating an instance of BindStatus for an unbound object results in an (expensive) exception,
             // so we avoid it by checking first. Because the check is a simplification, we still handle the exception.
             try {
-                return new BindStatus(requestContext, completeExpression, false);
+                return new BindStatusWithNamespacePrefix(requestContext, completeExpression, false, portletNamespace);
             } catch (final NotReadablePropertyException ignored) {
                 return null;
             }
@@ -416,7 +445,14 @@ public final class FieldUtils {
 
     }
 
-    
+    /**
+     * If running in Spring portlet environment, returns the current portlet
+     * namespace. If not a portlet environment, returns an empty string.
+     */
+    private static String portletNamespace() {
+    	IPortletUtil portletUtil = PortletUtilFactory.getPortletUtil();
+    	return portletUtil.getPortletNamespace();
+    }
     
     
     private static String validateAndGetValueExpression(
