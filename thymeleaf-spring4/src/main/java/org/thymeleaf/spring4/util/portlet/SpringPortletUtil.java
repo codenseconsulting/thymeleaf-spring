@@ -5,34 +5,28 @@ import javax.portlet.PortletResponse;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.portlet.context.PortletRequestAttributes;
+import org.thymeleaf.util.portlet.impl.AbstractPortletUtil;
 
-public class SpringPortletUtil implements IPortletUtil {
 
-	private static SpringPortletUtil INSTANCE;
-	
-	public static IPortletUtil getInstance() {
-		synchronized(SpringPortletUtil.class) {
-			if (INSTANCE == null) {
-				INSTANCE = new SpringPortletUtil();
-			}
-			return INSTANCE;
-		}
+public class SpringPortletUtil extends AbstractPortletUtil {
+
+	public final boolean isSupported() {
+		return SpringPortletEnvResolver.isSpringPortletEnv();
 	}
 	
 	public final boolean isPortletEnv() {
-		return true;
+		return isSupported();
 	}
 
-	public final String getPortletNamespace() {
-    	RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
+	@Override
+	protected final PortletResponse getPortletResponse() {
+		RequestAttributes attrs = RequestContextHolder.getRequestAttributes();
 		if (attrs instanceof PortletRequestAttributes){
-			final PortletResponse portletResponse = ((PortletRequestAttributes) attrs).getResponse();
-			// TODO log an incident if portletResponse is null!
-			return (portletResponse != null) ? portletResponse.getNamespace() : "";
+			return ((PortletRequestAttributes) attrs).getResponse();
 		} else {
-			// TODO log an incident!
-			return "";
+			return null;
 		}
 	}
+	
 	
 }

@@ -36,14 +36,14 @@ import org.thymeleaf.Configuration;
 import org.thymeleaf.context.IProcessingContext;
 import org.thymeleaf.exceptions.TemplateProcessingException;
 import org.thymeleaf.spring4.naming.SpringContextVariableNames;
-import org.thymeleaf.spring4.util.portlet.IPortletUtil;
-import org.thymeleaf.spring4.util.portlet.PortletUtilFactory;
 import org.thymeleaf.standard.expression.IStandardExpression;
 import org.thymeleaf.standard.expression.IStandardExpressionParser;
 import org.thymeleaf.standard.expression.SelectionVariableExpression;
 import org.thymeleaf.standard.expression.StandardExpressions;
 import org.thymeleaf.standard.expression.VariableExpression;
 import org.thymeleaf.util.Validate;
+import org.thymeleaf.util.portlet.IPortletUtil;
+import org.thymeleaf.util.portlet.PortletUtilFactory;
 
 
 /**
@@ -450,7 +450,7 @@ public final class FieldUtils {
      * namespace. If not a portlet environment, returns an empty string.
      */
     private static String portletNamespace() {
-    	IPortletUtil portletUtil = PortletUtilFactory.getPortletUtil();
+    	IPortletUtil portletUtil = PortletUtilFactory.getInstance().getPortletUtil();
     	return portletUtil.getPortletNamespace();
     }
     
